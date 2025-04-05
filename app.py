@@ -27,8 +27,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 # --- In-memory storage for job status (Replace with DB/Redis in production) ---
-# --- In-memory storage for job status (Replace with DB/Redis in production) ---
-# Structure: job_id -> {status, progress, start_time, input_path, output_paths, stats, health_report, error, estimated_time}
 conversion_jobs = {}
 
 # --- Helper Functions ---
@@ -73,7 +71,7 @@ def perform_conversion(job_id, input_path, output_format, optimizer_setting, pas
                 # if not password:
                 #     # Try authenticating with empty password (common for some PDFs)
                 #     if not pdf_doc.authenticate(''):
-                #          raise ValueError("PDF is password protected, but no password provided or incorrect.")
+                #         raise ValueError("PDF is password protected, but no password provided or incorrect.")
                 # elif not pdf_doc.authenticate(password):
                 #     raise ValueError("Incorrect password provided for protected PDF.")
                 # # If authentication succeeded, encryption is handled
@@ -83,7 +81,7 @@ def perform_conversion(job_id, input_path, output_format, optimizer_setting, pas
             # Simple font check (more complex analysis is possible)
             fonts = pdf_doc.get_page_fonts(0) # Check fonts on first page
             if not fonts:
-                 health_report["font_issues"] = "No fonts detected on first page (potential issue)."
+                health_report["font_issues"] = "No fonts detected on first page (potential issue)."
 
             # Estimate time based on page count (very rough)
             estimated_total_time = 10 + stats["page_count"] * 0.5 # 10s base + 0.5s per page
@@ -94,7 +92,7 @@ def perform_conversion(job_id, input_path, output_format, optimizer_setting, pas
             health_report["warnings"].append(f"Analysis Error: {analysis_error}")
             # Decide if analysis error is fatal or just a warning
             if isinstance(analysis_error, ValueError) and "password" in str(analysis_error).lower():
-                 raise analysis_error # Fatal password error
+                raise analysis_error # Fatal password error
             # Otherwise, continue to conversion attempt but log warning
 
         finally:
@@ -109,9 +107,9 @@ def perform_conversion(job_id, input_path, output_format, optimizer_setting, pas
         # We'll ignore the optimizer_setting for now, unless specific parameters are found later.
         # The library aims for good general conversion.
         if optimizer_setting == "compact":
-             health_report["warnings"].append("Compact optimization setting ignored (using pdf2docx defaults).")
+            health_report["warnings"].append("Compact optimization setting ignored (using pdf2docx defaults).")
         elif optimizer_setting == "quality":
-             health_report["warnings"].append("Quality optimization setting ignored (using pdf2docx defaults).")
+            health_report["warnings"].append("Quality optimization setting ignored (using pdf2docx defaults).")
 
 
         # Initialize Converter
@@ -132,7 +130,7 @@ def perform_conversion(job_id, input_path, output_format, optimizer_setting, pas
         # Final stats
         stats["processing_time_seconds"] = round(time.time() - start_time, 2)
         if not health_report["warnings"]:
-             health_report["warnings"].append("None") # Add None if no warnings occurred
+            health_report["warnings"].append("None") # Add None if no warnings occurred
 
         conversion_jobs[job_id]['stats'] = stats
         conversion_jobs[job_id]['health_report'] = health_report
@@ -157,6 +155,11 @@ def perform_conversion(job_id, input_path, output_format, optimizer_setting, pas
 
 
 # --- API Routes ---
+
+@app.route('/')
+def index():
+    """A basic route for the homepage."""
+    return jsonify({"message": "PDF to Word Converter API is running!"})
 
 @app.route('/api/convert', methods=['POST'])
 def upload_and_convert():
@@ -235,7 +238,7 @@ def get_progress(job_id):
     elif job['status'] == 'analyzing':
         response['message'] = 'Analyzing PDF structure...'
     elif job['status'] == 'processing':
-         response['message'] = 'Converting PDF to DOCX...'
+        response['message'] = 'Converting PDF to DOCX...'
 
     return jsonify(response), 200
 
@@ -250,13 +253,13 @@ def get_results(job_id):
         return jsonify({"message": "Job ID not found"}), 404
 
     if job['status'] == 'error':
-         return jsonify({
-             "job_id": job_id,
-             "status": job['status'],
-             "message": job.get('error', 'Conversion failed.'),
-             "statistics": job.get('stats'), # Include stats even on error if available
-             "health_report": job.get('health_report') # Include health report even on error
-             }), 400 # Use a 400 or 500 status for backend error
+        return jsonify({
+            "job_id": job_id,
+            "status": job['status'],
+            "message": job.get('error', 'Conversion failed.'),
+            "statistics": job.get('stats'), # Include stats even on error if available
+            "health_report": job.get('health_report') # Include health report even on error
+            }), 400 # Use a 400 or 500 status for backend error
     elif job['status'] != 'complete':
         return jsonify({"message": f"Job is not yet complete. Current status: {job['status']}"}), 202 # Accepted, but not ready
 
@@ -265,8 +268,8 @@ def get_results(job_id):
     if job.get('output_paths'):
         # Only expect 'docx' key now
         if 'docx' in job['output_paths']:
-             filename = os.path.basename(job['output_paths']['docx'])
-             download_urls['docx'] = f"/api/download/{filename}" # Example download route
+            filename = os.path.basename(job['output_paths']['docx'])
+            download_urls['docx'] = f"/api/download/{filename}" # Example download route
 
     response = {
         "job_id": job_id,
@@ -291,7 +294,7 @@ def download_file(filename):
         # For simplicity now, just serve if it exists in the output folder.
         return send_from_directory(app.config['OUTPUT_FOLDER'], filename, as_attachment=True)
     except FileNotFoundError:
-         return jsonify({"message": "File not found"}), 404
+        return jsonify({"message": "File not found"}), 404
 
 
 # --- Main Execution ---

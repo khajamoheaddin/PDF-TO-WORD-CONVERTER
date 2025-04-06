@@ -10,6 +10,33 @@ A simple Flask-based backend API to convert uploaded PDF files into DOCX format.
 * Offers download links for the converted files.
 * Includes basic PDF analysis (page count, simple font check).
 * Handles potential errors during conversion.
+* PDF to DOCX conversion with original filename preservation
+* Progress tracking during conversion
+* Basic PDF health reporting
+* Secure file downloads with proper filename headers
+
+## Filename Preservation
+
+The API now preserves the original filename during conversion:
+1. Frontend sends the original filename (without extension)
+2. Backend uses this name when saving converted files
+3. Download endpoint sets proper `Content-Disposition` headers
+
+Example:
+- Uploaded file: `my_document.pdf`
+- Converted file: `[job-id]_my_document.docx`
+- Downloaded as: `my_document.docx`
+
+## Setup & Installation
+
+[Previous setup instructions remain the same...]
+
+## API Changes
+
+The `/api/download` endpoint now:
+- Automatically sets the correct download filename
+- Preserves the original filename from upload
+- Maintains security checks against path traversal
 
 ## Requirements
 

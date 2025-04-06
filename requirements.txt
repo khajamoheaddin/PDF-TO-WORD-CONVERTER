@@ -1,6 +1,7 @@
-Flask>=2.0
-Flask-Cors>=3.0
+Flask>=2.3.2
+Flask-Cors>=3.0.10
 pdf2docx>=0.5.6 # For PDF to DOCX conversion (includes PyMuPDF)
+PyMuPDF==1.22.5
 gunicorn>=20.1.0 # For production deployment
 # Pillow>=9.0 # May be needed later for image optimization if pdf2docx options are insufficient
 # PyJWT>=2.0 # For JWT authentication
